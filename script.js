@@ -1,7 +1,184 @@
 let charts = {};
 let tripMode = "eco";
 let darkMode = false;
+let currentUser = { name: "You", initials: "YO" };
 
+/* ─── AUTH ─── */
+function showAuthScreen(s) {
+  document
+    .querySelectorAll(".auth-card")
+    .forEach((c) => (c.style.display = "none"));
+  document.getElementById("screen-" + s).style.display = "block";
+}
+
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  const show = el.type === "password";
+  el.type = show ? "text" : "password";
+  btn.innerHTML = show
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+}
+
+function checkStr(pw) {
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (/[A-Z]/.test(pw)) s++;
+  if (/[0-9]/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  const fills = [
+    ["0%", "var(--border)", ""],
+    ["25%", "var(--red)", "Weak"],
+    ["50%", "var(--amber)", "Fair"],
+    ["75%", "var(--amber)", "Good"],
+    ["100%", "var(--green)", "Strong"],
+  ];
+  const [w, c, t] = fills[s];
+  const f = document.getElementById("str-fill");
+  f.style.width = w;
+  f.style.background = c;
+  const l = document.getElementById("str-lbl");
+  l.textContent = t || "Enter a password";
+  l.style.color = c || "var(--text3)";
+}
+
+function showFieldErr(id, show) {
+  const e = document.getElementById(id);
+  if (e) e.style.display = show ? "block" : "none";
+}
+function setErr(id, err) {
+  const e = document.getElementById(id);
+  if (e) e.classList.toggle("err", err);
+}
+
+function doLogin() {
+  const email = document.getElementById("login-email").value.trim();
+  const pw = document.getElementById("login-pw").value;
+  let ok = true;
+  if (!email || !email.includes("@")) {
+    showFieldErr("err-le", true);
+    setErr("login-email", true);
+    ok = false;
+  } else {
+    showFieldErr("err-le", false);
+    setErr("login-email", false);
+  }
+  if (!pw) {
+    showFieldErr("err-lp", true);
+    setErr("login-pw", true);
+    ok = false;
+  } else {
+    showFieldErr("err-lp", false);
+    setErr("login-pw", false);
+  }
+  if (!ok) return;
+  const name = email
+    .split("@")[0]
+    .replace(/[._]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+  currentUser = {
+    name,
+    initials:
+      name
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase() || email.slice(0, 2).toUpperCase(),
+  };
+  launchApp();
+}
+
+function doRegister() {
+  const name = document.getElementById("reg-name").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
+  const pw = document.getElementById("reg-pw").value;
+  let ok = true;
+  if (!name) {
+    showFieldErr("err-rn", true);
+    setErr("reg-name", true);
+    ok = false;
+  } else {
+    showFieldErr("err-rn", false);
+    setErr("reg-name", false);
+  }
+  if (!email || !email.includes("@")) {
+    showFieldErr("err-re", true);
+    setErr("reg-email", true);
+    ok = false;
+  } else {
+    showFieldErr("err-re", false);
+    setErr("reg-email", false);
+  }
+  if (pw.length < 8) {
+    showFieldErr("err-rp", true);
+    setErr("reg-pw", true);
+    ok = false;
+  } else {
+    showFieldErr("err-rp", false);
+    setErr("reg-pw", false);
+  }
+  if (!ok) return;
+  const veh = document.getElementById("reg-veh").value.trim();
+  if (veh) document.getElementById("topbar-name").textContent = veh;
+  currentUser = {
+    name,
+    initials: name
+      .split(" ")
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase(),
+  };
+  showAuthScreen("login");
+  const b = document.getElementById("reg-success-msg");
+  b.style.display = "flex";
+}
+
+function doGoogleLogin() {
+  currentUser = { name: "Alex Johnson", initials: "AJ" };
+  launchApp();
+}
+
+function doForgot() {
+  const email = document.getElementById("forgot-email").value.trim();
+  if (!email || !email.includes("@")) {
+    showFieldErr("err-fe", true);
+    return;
+  }
+  showFieldErr("err-fe", false);
+  document.getElementById("forgot-form-inner").style.display = "none";
+  document.getElementById("forgot-sent").style.display = "block";
+}
+
+function launchApp() {
+  document.getElementById("auth-screen").style.display = "none";
+  const app = document.getElementById("app-shell");
+  app.style.display = "flex";
+  document.getElementById("user-avatar").textContent = currentUser.initials;
+  document.getElementById("mob-user-avatar").textContent = currentUser.initials;
+  document.getElementById("mob-user-name").textContent = currentUser.name;
+  update();
+}
+
+function doSignOut() {
+  document.getElementById("app-shell").style.display = "none";
+  document.getElementById("auth-screen").style.display = "flex";
+  showAuthScreen("login");
+  closeDrawer();
+}
+
+/* ─── MOBILE DRAWER ─── */
+function openDrawer() {
+  document.getElementById("mob-overlay").classList.add("open");
+  document.getElementById("mob-drawer").classList.add("open");
+}
+function closeDrawer() {
+  document.getElementById("mob-overlay").classList.remove("open");
+  document.getElementById("mob-drawer").classList.remove("open");
+}
+
+/* ─── NAVIGATION ─── */
 function navigate(page, el) {
   document
     .querySelectorAll(".page")
@@ -11,11 +188,15 @@ function navigate(page, el) {
     .forEach((n) => n.classList.remove("active"));
   document.getElementById("page-" + page).classList.add("active");
   if (el) el.classList.add("active");
+  const mobId = "mob-item-" + page;
+  const mobEl = document.getElementById(mobId);
+  if (mobEl) mobEl.classList.add("active");
   if (page === "analytics") setTimeout(() => buildCharts(), 50);
   if (page === "battery") setTimeout(() => buildVoltChart(), 50);
   if (page === "alerts") buildAlerts();
 }
 
+/* ─── PROTO PANEL ─── */
 function toggleProto() {
   const body = document.getElementById("proto-body");
   const chev = document.getElementById("proto-chevron");
@@ -25,6 +206,7 @@ function toggleProto() {
     : "";
 }
 
+/* ─── SENSOR VALUES ─── */
 function getVals() {
   return {
     batt: +document.getElementById("sl-batt").value,
@@ -36,8 +218,9 @@ function getVals() {
   };
 }
 
-const MAX_RANGE = 150;
+let MAX_RANGE = 150;
 
+/* ─── MAIN UPDATE ─── */
 function update() {
   const v = getVals();
   document.getElementById("lbl-batt").textContent = v.batt + "%";
@@ -114,23 +297,18 @@ function update() {
     ? Math.min(v.thr, 70) + "% max"
     : "Charge first";
 
-  // Status
-  let statusKey = "safe",
-    statusLabel = "Safe",
+  let statusLabel = "Safe",
     statusSub = "All systems normal",
     statusColor = "var(--green)",
     statusBg = "var(--green-mid)",
     icon = "✓";
-  const tags = [];
   if (v.batt < 10) {
-    statusKey = "critical";
     statusLabel = "Critical";
     statusSub = "Battery critically low";
     statusColor = "var(--red)";
     statusBg = "var(--red-mid)";
     icon = "!";
   } else if (v.batt < 20) {
-    statusKey = "low";
     statusLabel = "Low Battery";
     statusSub = "Charge soon";
     statusColor = "var(--amber)";
@@ -138,7 +316,6 @@ function update() {
     icon = "↓";
   }
   if (v.curr > 40) {
-    statusKey = "highusage";
     statusLabel = "High Usage";
     statusSub = "Reduce throttle";
     statusColor = "var(--amber)";
@@ -146,7 +323,6 @@ function update() {
     icon = "↑";
   }
   if (v.temp > 45) {
-    statusKey = "hot";
     statusLabel = "Temperature High";
     statusSub = "Battery overheating";
     statusColor = "var(--red)";
@@ -154,6 +330,7 @@ function update() {
     icon = "🌡";
   }
 
+  const tags = [];
   if (v.batt > 60)
     tags.push(
       '<span class="status-pill pill-green" style="font-size:11px"><span class="pill-dot"></span>Battery OK</span>',
@@ -191,7 +368,6 @@ function update() {
   document.getElementById("status-sub").textContent = statusSub;
   document.getElementById("status-tags").innerHTML = tags.join("");
 
-  // Recommendations
   const recs = [];
   if (v.thr > 70)
     recs.push({
@@ -242,8 +418,7 @@ function update() {
       text: "All systems operating normally",
     });
 
-  const recsEl = document.getElementById("recs-list");
-  recsEl.innerHTML = recs
+  document.getElementById("recs-list").innerHTML = recs
     .slice(0, 4)
     .map(
       (r) =>
@@ -251,18 +426,19 @@ function update() {
     )
     .join("");
 
-  // Update battery health page
   updateBatteryHealth(v);
-  // Update alert count
+
   let ac = 0;
   if (v.batt < 20) ac++;
   if (!canReach) ac++;
   if (v.curr > 40) ac++;
   if (v.temp > 45) ac++;
-  document.getElementById("alert-count").textContent = ac || "";
-  document.getElementById("alert-count").style.display = ac ? "" : "none";
-
-  document.getElementById("last-updated").textContent = "Updated just now";
+  const acEl = document.getElementById("alert-count");
+  acEl.textContent = ac || "";
+  acEl.style.display = ac ? "" : "none";
+  const mobAc = document.getElementById("mob-alert-count");
+  mobAc.textContent = ac || "";
+  mobAc.style.display = ac ? "" : "none";
 }
 
 function updateBatteryHealth(v) {
@@ -280,25 +456,26 @@ function updateBatteryHealth(v) {
   );
   document.getElementById("health-score-val").textContent = health;
   const ring = document.getElementById("health-ring");
-  const offset = 314 * (1 - health / 100);
-  ring.setAttribute("stroke-dashoffset", offset.toFixed(1));
+  ring.setAttribute("stroke-dashoffset", (314 * (1 - health / 100)).toFixed(1));
   ring.setAttribute(
     "stroke",
     health > 60 ? "#16a34a" : health > 30 ? "#d97706" : "#dc2626",
   );
-
-  const voltStab = Math.round(Math.min(100, 85 + (v.volt - 36) * 0.5));
-  document.getElementById("volt-stab").textContent = voltStab + "%";
-  document.getElementById("volt-stab-bar").style.width = voltStab + "%";
+  const hpill = document.getElementById("health-pill");
+  hpill.className =
+    "status-pill " +
+    (health > 60 ? "pill-green" : health > 40 ? "pill-amber" : "pill-red");
+  hpill.innerHTML =
+    '<span class="pill-dot"></span>' +
+    (health > 60 ? "Good" : health > 40 ? "Watch" : "Poor");
+  const vs = Math.round(Math.min(100, 85 + (v.volt - 36) * 0.5));
+  document.getElementById("volt-stab").textContent = vs + "%";
+  document.getElementById("volt-stab-bar").style.width = vs + "%";
   document.getElementById("volt-stab-bar").style.background =
-    voltStab > 70 ? "var(--green)" : "var(--amber)";
-
-  const capRet = Math.round(Math.min(100, 88 - v.curr * 0.1));
-  document.getElementById("cap-ret").textContent = capRet + "%";
-  document.getElementById("cap-ret-bar").style.width = capRet + "%";
-  document.getElementById("cap-ret-bar").style.background =
-    capRet > 70 ? "var(--green)" : "var(--amber)";
-
+    vs > 70 ? "var(--green)" : "var(--amber)";
+  const cr = Math.round(Math.min(100, 88 - v.curr * 0.1));
+  document.getElementById("cap-ret").textContent = cr + "%";
+  document.getElementById("cap-ret-bar").style.width = cr + "%";
   const thermal = v.temp < 35 ? 100 : v.temp < 45 ? 80 : 50;
   const thermalLabel = v.temp < 35 ? "Optimal" : v.temp < 45 ? "Warm" : "High";
   document.getElementById("therm-cond").textContent = thermalLabel;
@@ -309,12 +486,10 @@ function updateBatteryHealth(v) {
       : thermal > 40
         ? "var(--amber)"
         : "var(--red)";
-
   document.getElementById("batt-temp-disp").textContent =
     v.temp + "°C — " + thermalLabel;
   document.getElementById("degradation").textContent =
     "~" + ((100 - health) * 0.05).toFixed(1) + "%";
-
   const repStatus =
     health > 70
       ? '<span class="status-pill pill-green" style="font-size:11px"><span class="pill-dot"></span>Good</span>'
@@ -322,14 +497,6 @@ function updateBatteryHealth(v) {
         ? '<span class="status-pill pill-amber" style="font-size:11px"><span class="pill-dot"></span>Watch</span>'
         : '<span class="status-pill pill-red" style="font-size:11px"><span class="pill-dot"></span>Poor</span>';
   document.getElementById("replace-status").innerHTML = repStatus;
-
-  const hpill = document.getElementById("health-pill");
-  hpill.className =
-    "status-pill " +
-    (health > 70 ? "pill-green" : health > 40 ? "pill-amber" : "pill-red");
-  hpill.innerHTML =
-    '<span class="pill-dot"></span>' +
-    (health > 70 ? "Good" : health > 40 ? "Watch" : "Poor");
 }
 
 function buildAlerts() {
@@ -374,7 +541,7 @@ function buildAlerts() {
       sev: "amber",
       icon: "🔌",
       title: "Charging recommended soon",
-      sub: "Battery at " + v.batt + "% — find a charging point",
+      sub: "Battery at " + v.batt + "%",
       time: "Just now",
     });
   if (alerts.length === 0)
@@ -385,24 +552,15 @@ function buildAlerts() {
       sub: "All systems operating normally",
       time: "Just now",
     });
-
   const colorMap = {
-    red: ["var(--red-mid)", "var(--red)"],
-    amber: ["var(--amber-mid)", "var(--amber)"],
-    green: ["var(--green-mid)", "var(--green)"],
+    red: "var(--red-mid)",
+    amber: "var(--amber-mid)",
+    green: "var(--green-mid)",
   };
   document.getElementById("alerts-list").innerHTML = alerts
     .map(
-      (a) => `
-    <div class="alert-card">
-      <div class="alert-icon" style="background:${colorMap[a.sev][0]}">${a.icon}</div>
-      <div style="flex:1">
-        <div class="alert-title">${a.title}</div>
-        <div class="alert-sub">${a.sub}</div>
-        <div class="alert-time">${a.time}</div>
-      </div>
-      <span class="status-pill ${a.sev === "red" ? "pill-red" : a.sev === "amber" ? "pill-amber" : "pill-green"}" style="font-size:11px"><span class="pill-dot"></span>${a.sev === "red" ? "Critical" : a.sev === "amber" ? "Warning" : "OK"}</span>
-    </div>`,
+      (a) =>
+        `<div class="alert-card"><div class="alert-icon" style="background:${colorMap[a.sev]}">${a.icon}</div><div style="flex:1"><div class="alert-title">${a.title}</div><div class="alert-sub">${a.sub}</div><div class="alert-time">${a.time}</div></div><span class="status-pill ${a.sev === "red" ? "pill-red" : a.sev === "amber" ? "pill-amber" : "pill-green"}" style="font-size:11px"><span class="pill-dot"></span>${a.sev === "red" ? "Critical" : a.sev === "amber" ? "Warning" : "OK"}</span></div>`,
     )
     .join("");
 }
@@ -421,23 +579,13 @@ function calcTrip() {
   const modeMulti = { eco: 1.15, normal: 1.0, sport: 0.82 }[tripMode];
   const range = Math.round((v.batt / 100) * MAX_RANGE * modeMulti);
   const canReach = range >= dist;
-  const battUsed = Math.round(((dist / MAX_RANGE) * 100) / modeMulti);
+  const battUsed = Math.min(
+    100,
+    Math.round(((dist / MAX_RANGE) * 100) / modeMulti),
+  );
   const recThr = { eco: 40, normal: 60, sport: 80 }[tripMode];
-  const out = document.getElementById("trip-output");
-  out.innerHTML = `
-    ${
-      canReach
-        ? `<div class="reach-result reach-yes"><div class="reach-icon">✅</div><div class="reach-label" style="color:var(--green)">Trip Feasible</div><div class="reach-sub">${dist} km journey within your ${range} km range</div></div>`
-        : `<div class="reach-result reach-no"><div class="reach-icon">❌</div><div class="reach-label" style="color:var(--red)">Trip Not Feasible</div><div class="reach-sub">Need ${dist - range} km more range — charge to ${Math.min(100, Math.round(v.batt + ((dist - range) / MAX_RANGE) * 100))}% first</div></div>`
-    }
-    <div style="margin-top:12px">
-      <div class="info-row"><span class="info-key">Expected battery usage</span><span class="info-val">${Math.min(100, battUsed)}%</span></div>
-      <div class="info-row"><span class="info-key">Available range</span><span class="info-val">${range} km</span></div>
-      <div class="info-row"><span class="info-key">Range after trip</span><span class="info-val">${Math.max(0, range - dist)} km</span></div>
-      <div class="info-row"><span class="info-key">Charging stop</span><span class="info-val">${canReach && range - dist < 30 ? "Recommended at ~" + Math.round(dist * 0.6) + " km" : canReach ? "Not required" : "Before departure"}</span></div>
-      <div class="info-row"><span class="info-key">Suggested throttle</span><span class="info-val">${recThr}% max</span></div>
-      <div class="info-row"><span class="info-key">Driving mode</span><span class="info-val" style="text-transform:capitalize">${tripMode}</span></div>
-    </div>`;
+  document.getElementById("trip-output").innerHTML =
+    `${canReach ? `<div class="reach-result reach-yes"><div class="reach-icon">✅</div><div class="reach-label" style="color:var(--green)">Trip Feasible</div><div class="reach-sub">${dist} km journey within your ${range} km range</div></div>` : `<div class="reach-result reach-no"><div class="reach-icon">❌</div><div class="reach-label" style="color:var(--red)">Trip Not Feasible</div><div class="reach-sub">Need ${dist - range} km more range — charge to ${Math.min(100, Math.round(v.batt + ((dist - range) / MAX_RANGE) * 100))}% first</div></div>`}<div style="margin-top:12px"><div class="info-row"><span class="info-key">Expected battery usage</span><span class="info-val">${battUsed}%</span></div><div class="info-row"><span class="info-key">Available range</span><span class="info-val">${range} km</span></div><div class="info-row"><span class="info-key">Range after trip</span><span class="info-val">${Math.max(0, range - dist)} km</span></div><div class="info-row"><span class="info-key">Charging stop</span><span class="info-val">${canReach && range - dist < 30 ? "Recommended at ~" + Math.round(dist * 0.6) + " km" : canReach ? "Not required" : "Before departure"}</span></div><div class="info-row"><span class="info-key">Suggested throttle</span><span class="info-val">${recThr}% max</span></div><div class="info-row"><span class="info-key">Driving mode</span><span class="info-val" style="text-transform:capitalize">${tripMode}</span></div></div>`;
 }
 
 function buildVoltChart() {
@@ -460,8 +608,7 @@ function buildVoltChart() {
     (_, i) => +(base - 0.8 + Math.random() * 1.6).toFixed(2),
   );
   data[9] = base;
-  const ctx = document.getElementById("voltChart");
-  charts.volt = new Chart(ctx, {
+  charts.volt = new Chart(document.getElementById("voltChart"), {
     type: "line",
     data: {
       labels,
@@ -620,14 +767,40 @@ function buildCharts() {
 function toggleDark(el) {
   el.classList.toggle("on");
   darkMode = el.classList.contains("on");
-  document.body.style.background = darkMode ? "#0f111a" : "";
-  document
-    .querySelectorAll(".card,.sidebar,.topbar,.proto-panel")
-    .forEach((c) => (c.style.background = darkMode ? "#1a1d2e" : ""));
-  document
-    .querySelectorAll(".card")
-    .forEach((c) => (c.style.border = darkMode ? "1px solid #2a2d3e" : ""));
+  const root = document.documentElement;
+  if (darkMode) {
+    root.style.setProperty("--bg", "#0f111a");
+    root.style.setProperty("--surface", "#1a1d2e");
+    root.style.setProperty("--surface2", "#22263a");
+    root.style.setProperty("--border", "#2a2d3e");
+    root.style.setProperty("--text", "#e8eaf0");
+    root.style.setProperty("--text2", "#9ca3c4");
+    root.style.setProperty("--text3", "#6b7280");
+    root.style.setProperty("--blue-light", "#1e2a4a");
+    root.style.setProperty("--blue-mid", "#1e3a6e");
+    root.style.setProperty("--green-light", "#0d2318");
+    root.style.setProperty("--green-mid", "#14532d55");
+    root.style.setProperty("--amber-light", "#1c1506");
+    root.style.setProperty("--amber-mid", "#78350f44");
+    root.style.setProperty("--red-light", "#1c0606");
+    root.style.setProperty("--red-mid", "#7f1d1d44");
+  } else {
+    root.style.setProperty("--bg", "#f7f8fa");
+    root.style.setProperty("--surface", "#ffffff");
+    root.style.setProperty("--surface2", "#f0f2f5");
+    root.style.setProperty("--border", "#e4e7ec");
+    root.style.setProperty("--text", "#111827");
+    root.style.setProperty("--text2", "#6b7280");
+    root.style.setProperty("--text3", "#9ca3af");
+    root.style.setProperty("--blue-light", "#eff6ff");
+    root.style.setProperty("--blue-mid", "#dbeafe");
+    root.style.setProperty("--green-light", "#f0fdf4");
+    root.style.setProperty("--green-mid", "#dcfce7");
+    root.style.setProperty("--amber-light", "#fffbeb");
+    root.style.setProperty("--amber-mid", "#fef3c7");
+    root.style.setProperty("--red-light", "#fef2f2");
+    root.style.setProperty("--red-mid", "#fee2e2");
+  }
 }
 
 toggleProto();
-update();
