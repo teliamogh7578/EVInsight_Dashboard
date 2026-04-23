@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">EVMon</div>
+      <div class="logo-sub">Battery System</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Monitor</div>
+    <div class="nav-item active" onclick="navigate('dashboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('trip', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+      Trip Planner
+    </div>
+    <div class="nav-item" onclick="navigate('battery', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 11v2"/></svg>
+      Battery Health
+    </div>
+    <div class="nav-label" style="margin-top:8px">Insights</div>
+    <div class="nav-item" onclick="navigate('analytics', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Analytics
+    </div>
+    <div class="nav-item" onclick="navigate('alerts', this)" id="alerts-nav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Alerts
+      <span class="nav-badge" id="alert-count">3</span>
+    </div>
+    <div class="nav-label" style="margin-top:8px">Account</div>
+    <div class="nav-item" onclick="navigate('settings', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </div>
+  </nav>
+</div>
+
+<div class="topbar">
+  <div class="vehicle-info">
+    <div class="vehicle-name" id="topbar-name">Tesla Model 3</div>
+    <div class="conn-status"><span class="conn-dot"></span><span id="conn-text">Prototype mode — simulated data</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" onclick="navigate('alerts', document.querySelector('.nav-item:nth-child(6)'))">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+    <div class="avatar">YO</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD PAGE -->
+<div id="page-dashboard" class="page active">
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub" id="last-updated">Updated just now</div>
+
+  <!-- Prototype Controls -->
+  <div class="proto-panel">
+    <div class="proto-header" onclick="toggleProto()">
+      <div class="proto-header-left">
+        <span class="proto-badge">PROTOTYPE</span>
+        <span class="proto-title">Simulation Controls</span>
+      </div>
+      <svg id="proto-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="proto-body" id="proto-body">
+      <div class="slider-grid">
+        <div class="slider-wrap">
+          <div class="slider-label"><span class="slider-name">Battery %</span><span class="slider-val" id="lbl-batt">72%</span></div>
+          <input type="range" min="0" max="100" value="72" id="sl-batt" oninput="update()">
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-label"><span class="slider-name">Voltage (V)</span><span class="slider-val" id="lbl-volt">48.2 V</span></div>
+          <input type="range" min="36" max="54" step="0.1" value="48.2" id="sl-volt" oninput="update()">
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-label"><span class="slider-name">Destination (km)</span><span class="slider-val" id="lbl-dest">45 km</span></div>
+          <input type="range" min="0" max="200" value="45" id="sl-dest" oninput="update()">
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-label"><span class="slider-name">Throttle %</span><span class="slider-val" id="lbl-thr">55%</span></div>
+          <input type="range" min="0" max="100" value="55" id="sl-thr" oninput="update()">
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-label"><span class="slider-name">Current Draw (A)</span><span class="slider-val" id="lbl-curr">18 A</span></div>
+          <input type="range" min="0" max="60" value="18" id="sl-curr" oninput="update()">
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-label"><span class="slider-name">Temperature (°C)</span><span class="slider-val" id="lbl-temp">28°C</span></div>
+          <input type="range" min="-10" max="60" value="28" id="sl-temp" oninput="update()">
+        </div>
+      </div>
+      <div class="proto-note">⚠ Prototype mode: values are simulated via manual controls. Future versions will auto-sync from STM32 hardware via WebSerial/USB.</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-bottom:16px">
+    <!-- Battery Summary -->
+    <div class="card">
+      <div class="card-title">Battery Summary
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 11v2"/></svg>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <div class="stat-big" id="d-batt">72<span class="stat-unit">%</span></div>
+        <div id="d-charge-pill" style="margin-bottom:8px"></div>
+      </div>
+      <div class="battery-bar-wrap">
+        <div class="battery-bar-track"><div class="battery-bar-fill" id="batt-bar" style="width:72%;background:var(--green)"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-item">
+          <div class="val" id="d-volt">48.2 V</div>
+          <div class="lbl">Voltage</div>
+        </div>
+        <div class="stat-item">
+          <div class="val" id="d-runtime">3.2 h</div>
+          <div class="lbl">Est. Runtime</div>
+        </div>
+        <div class="stat-item">
+          <div class="val" id="d-range">108 km</div>
+          <div class="lbl">Est. Range</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance -->
+    <div class="card">
+      <div class="card-title">Performance
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="stat-row" style="margin-top:0">
+        <div class="stat-item">
+          <div class="val" id="d-curr">18 A</div>
+          <div class="lbl">Current Draw</div>
+        </div>
+        <div class="stat-item">
+          <div class="val" id="d-power">0.87 kW</div>
+          <div class="lbl">Power Usage</div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="progress-label"><span>Efficiency</span><span id="eff-label">Good</span></div>
+        <div class="progress-track"><div class="progress-fill" id="eff-bar" style="width:65%;background:var(--green)"></div></div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="progress-label"><span>Throttle</span><span id="thr-label">55%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="thr-bar" style="width:55%;background:var(--blue)"></div></div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
+        <span class="info-key">Driving Mode</span>
+        <span class="status-pill pill-blue" id="d-mode"><span class="pill-dot"></span>Normal</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-bottom:16px">
+    <!-- Trip Readiness -->
+    <div class="card">
+      <div class="card-title">Trip Readiness
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+      </div>
+      <div id="d-reach-result"></div>
+      <div style="margin-top:12px">
+        <div class="info-row"><span class="info-key">Destination</span><span class="info-val" id="d-dest-km">45 km</span></div>
+        <div class="info-row"><span class="info-key">After trip range</span><span class="info-val" id="d-after-range">—</span></div>
+        <div class="info-row"><span class="info-key">Charging stop</span><span class="info-val" id="d-charge-stop">—</span></div>
+        <div class="info-row"><span class="info-key">Recommended throttle</span><span class="info-val" id="d-rec-thr">—</span></div>
+      </div>
+    </div>
+
+    <!-- Vehicle Status + Recommendations -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card" style="flex:1">
+        <div class="card-title">Vehicle Status</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div id="status-icon" style="width:44px;height:44px;border-radius:50%;background:var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:20px">✓</div>
+          <div>
+            <div id="status-label" style="font-size:16px;font-weight:600;color:var(--green)">Safe</div>
+            <div id="status-sub" style="font-size:12px;color:var(--text3);margin-top:2px">All systems normal</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px" id="status-tags"></div>
+      </div>
+      <div class="card" style="flex:1">
+        <div class="card-title">Recommendations</div>
+        <div id="recs-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRIP PLANNER PAGE -->
+<div id="page-trip" class="page">
+  <div class="page-title">Trip Planner</div>
+  <div class="page-sub">Plan your journey and check feasibility</div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="section-head"><div class="section-title">Journey Details</div></div>
+      <div class="form-group">
+        <label class="form-label">Destination Distance (km)</label>
+        <input type="number" class="form-input" id="trip-dist" value="80" min="0" max="500" placeholder="Enter distance in km">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Driving Mode</label>
+        <div class="mode-row">
+          <div class="mode-btn selected" id="mode-eco" onclick="selectMode('eco')">🍃 Eco</div>
+          <div class="mode-btn" id="mode-normal" onclick="selectMode('normal')">⚡ Normal</div>
+          <div class="mode-btn" id="mode-sport" onclick="selectMode('sport')">🏎 Sport</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="calcTrip()">Calculate Trip</button>
+    </div>
+    <div class="card">
+      <div class="section-head"><div class="section-title">Trip Analysis</div></div>
+      <div id="trip-output">
+        <div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">Enter a destination and click Calculate</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BATTERY HEALTH PAGE -->
+<div id="page-battery" class="page">
+  <div class="page-title">Battery Health</div>
+  <div class="page-sub">Detailed analysis of battery condition</div>
+  <div class="grid grid-2" style="margin-bottom:16px">
+    <div class="card" style="display:flex;flex-direction:column;align-items:center">
+      <div class="card-title" style="width:100%">Health Score</div>
+      <div class="health-score-ring">
+        <div class="ring-container">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="10"/>
+            <circle id="health-ring" cx="60" cy="60" r="50" fill="none" stroke="#16a34a" stroke-width="10" stroke-dasharray="314" stroke-dashoffset="47" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-score" id="health-score-val">85</div>
+            <div class="ring-label">/ 100</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;text-align:center">
+          <div class="status-pill pill-green" id="health-pill"><span class="pill-dot"></span>Good</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Diagnostics</div>
+      <div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Voltage Stability</span><span id="volt-stab">92%</span></div>
+          <div class="progress-track"><div class="progress-fill" id="volt-stab-bar" style="width:92%;background:var(--green)"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Capacity Retention</span><span id="cap-ret">88%</span></div>
+          <div class="progress-track"><div class="progress-fill" id="cap-ret-bar" style="width:88%;background:var(--green)"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Thermal Condition</span><span id="therm-cond">Optimal</span></div>
+          <div class="progress-track"><div class="progress-fill" id="therm-bar" style="width:75%;background:var(--green)"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>Charge Efficiency</span><span id="chg-eff">90%</span></div>
+          <div class="progress-track"><div class="progress-fill" id="chg-eff-bar" style="width:90%;background:var(--blue)"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        <div class="info-row"><span class="info-key">Est. Degradation</span><span class="info-val" id="degradation">~3.5%</span></div>
+        <div class="info-row"><span class="info-key">Replacement Status</span><span class="info-val" id="replace-status"><span class="status-pill pill-green" style="font-size:11px"><span class="pill-dot"></span>Good</span></span></div>
+        <div class="info-row"><span class="info-key">Temperature</span><span class="info-val" id="batt-temp-disp">28°C — Normal</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Voltage History (Simulated)</div>
+    <div class="chart-wrap"><canvas id="voltChart" role="img" aria-label="Voltage trend over time">Voltage readings over the past 10 data points.</canvas></div>
+  </div>
+</div>
+
+<!-- ANALYTICS PAGE -->
+<div id="page-analytics" class="page">
+  <div class="page-title">Analytics</div>
+  <div class="page-sub">Historical trends and performance metrics</div>
+  <div class="grid grid-2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">Battery % Over Time</div>
+      <div class="chart-wrap"><canvas id="battChart" role="img" aria-label="Battery percentage over time">Battery percentage over the past 10 sessions.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Efficiency History</div>
+      <div class="chart-wrap"><canvas id="effChart" role="img" aria-label="Efficiency score history">Efficiency ratings over the past 10 sessions.</canvas></div>
+    </div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">Runtime Trend (hrs)</div>
+      <div class="chart-wrap"><canvas id="runtimeChart" role="img" aria-label="Runtime trend in hours">Runtime in hours over the past 10 sessions.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Throttle Usage Distribution</div>
+      <div class="chart-wrap"><canvas id="thrChart" role="img" aria-label="Throttle usage distribution pie chart">Distribution of throttle usage modes.</canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ALERTS PAGE -->
+<div id="page-alerts" class="page">
+  <div class="page-title">Alerts</div>
+  <div class="page-sub">System notifications and warnings</div>
+  <div id="alerts-list"></div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div id="page-settings" class="page">
+  <div class="page-title">Settings</div>
+  <div class="page-sub">Configure your vehicle and preferences</div>
+  <div class="grid grid-2">
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Vehicle Profile</div>
+        <div class="form-group">
+          <label class="form-label">Vehicle Name</label>
+          <input type="text" class="form-input" id="veh-name" value="Tesla Model 3" oninput="document.getElementById('topbar-name').textContent=this.value">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Range (km)</label>
+          <input type="number" class="form-input" id="max-range-input" value="150">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Distance Units</label>
+          <select class="form-select" id="units-sel">
+            <option>Kilometers (km)</option>
+            <option>Miles (mi)</option>
+          </select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Alert Preferences</div>
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="t">Low battery alerts</div><div class="s">Notify when below 20%</div></div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="t">High usage warnings</div><div class="s">Notify when draw exceeds 40A</div></div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="t">Temperature alerts</div><div class="s">Notify when above 45°C</div></div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="t">Route feasibility</div><div class="s">Warn when destination unreachable</div></div>
+          <div class="toggle on"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Display</div>
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="t">Prototype mode</div><div class="s">Use manual sliders instead of hardware</div></div>
+          <div class="toggle on" id="proto-toggle" onclick="this.classList.toggle('on');document.getElementById('conn-text').textContent=this.classList.contains('on')?'Prototype mode — simulated data':'Live hardware mode'"></div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="t">Dark mode</div><div class="s">Switch to dark theme</div></div>
+          <div class="toggle" id="dark-toggle" onclick="toggleDark(this)"></div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="t">Compact sidebar</div><div class="s">Collapse to icon-only</div></div>
+          <div class="toggle"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Hardware Integration</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">STM32 Auto-Connect</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Direct hardware sync via WebSerial/USB. Automatically replace manual slider inputs with live potentiometer and sensor data.</div>
+          <div class="status-pill pill-amber" style="margin-bottom:12px"><span class="pill-dot"></span>Coming in v2.0</div>
+          <button class="btn" style="width:100%;border:1px solid var(--border);background:var(--surface);font-size:13px;opacity:.5;cursor:not-allowed">Connect Hardware</button>
+        </div>
+        <div class="proto-note" style="margin-top:12px">Current version uses prototype simulation mode. Hardware auto-connect will be available once STM32 WebSerial integration is complete.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
