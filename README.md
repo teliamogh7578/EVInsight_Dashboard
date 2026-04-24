@@ -15,6 +15,13 @@ The project was built quickly for expo demonstration purposes to showcase the co
 **Important:** All values shown in this version are **simulated** for demonstration purposes and do not represent live production-grade vehicle data.
 
 ---
+## Live Demo
+
+Try the project here:
+
+**Demo Link:** `https://routepulse.netlify.app/`
+
+> Note: This is a prototype demo built for exhibition purposes. All displayed values are simulated and some features may be experimental.
 
 ## Demo Notice
 
