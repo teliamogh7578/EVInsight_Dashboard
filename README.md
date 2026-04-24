@@ -1,6 +1,6 @@
 # EVInsight Dashboard
 
-A clean and user-friendly EV monitoring dashboard for real-time battery status, trip feasibility, efficiency analytics, and future STM32 hardware integration.
+A clean and user-friendly EV monitoring dashboard for battery status, trip feasibility, efficiency analytics, and future STM32 hardware integration.
 
 Built as a companion software system for a **Physics Project Expo**, alongside the hardware prototype **Smart Electric Vehicle Battery Monitoring and Route Feasibility System**.
 
@@ -8,11 +8,27 @@ Built as a companion software system for a **Physics Project Expo**, alongside t
 
 ## Overview
 
-EVInsight Dashboard was created to extend a hardware-based EV battery monitoring project into a practical user interface.
+EVInsight Dashboard was created to visually demonstrate how a hardware EV battery monitoring system can be extended into a practical software dashboard.
 
-The goal was to demonstrate how embedded systems and software dashboards can work together to improve electric vehicle usability, battery awareness, and travel confidence.
+The project was built quickly for expo demonstration purposes to showcase the concept of combining embedded systems with a modern monitoring interface.
 
-This current version uses manual inputs/sliders to simulate hardware values. Future versions can directly inherit live readings from STM32 potentiometers and sensors.
+**Important:** All values shown in this version are **simulated** for demonstration purposes and do not represent live production-grade vehicle data.
+
+---
+
+## Demo Notice
+
+This project was developed in a short time specifically for presentation/demo use.
+
+Because of that:
+
+* Some features may be incomplete
+* Some calculations are simplified
+* UI interactions may contain bugs
+* Values are simulated
+* Performance may not be fully optimized
+
+This version is meant to demonstrate the idea and future potential of the system.
 
 ---
 
@@ -26,13 +42,13 @@ Electric vehicle users often face:
 * Lack of clear battery insights
 * Poor trip planning
 
-This dashboard helps solve those issues with a simple monitoring system.
+This dashboard explores how software can help solve those issues.
 
 ---
 
 ## Features
 
-* Real-time battery percentage monitoring
+* Simulated battery percentage monitoring
 * Voltage and runtime estimation
 * Destination reachability checker
 * Suggested charging alerts
@@ -87,7 +103,7 @@ This dashboard helps solve those issues with a simple monitoring system.
 
 ## Current Prototype Mode
 
-This version currently supports manual controls for demonstration/testing:
+This version currently uses manual controls/sliders for simulation:
 
 * Battery %
 * Voltage
@@ -95,29 +111,28 @@ This version currently supports manual controls for demonstration/testing:
 * Throttle %
 * Current draw
 
-These values simulate live hardware readings during the expo demo.
+These are used to mimic hardware readings during the expo demo.
 
 ---
 
 ## Future Integration
 
-Planned future upgrades:
+Planned upgrades:
 
 * Direct STM32 hardware connection
 * Auto-sync potentiometer readings
 * Real-time sensor streaming
 * Web Serial / USB integration
-* IoT cloud support
+* Better calculations
 * Mobile companion app
+* Stable production-ready version
 
 ---
 
 ## Tech Stack
 
-* React
-* HTML
-* CSS
-* JavaScript
+* React / HTML / CSS / JavaScript
+* Chart.js / Recharts
 * Responsive UI design
 
 ---
@@ -125,7 +140,7 @@ Planned future upgrades:
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/EVInsight-Dashboard.git
+git clone https://github.com/teliamogh7578/EVInsight-Dashboard.git
 cd EVInsight-Dashboard
 npm install
 npm run dev
@@ -135,18 +150,23 @@ npm run dev
 
 ## Project Expo Purpose
 
-This dashboard was built to showcase how a traditional physics/electronics hardware prototype can be transformed into a modern software-assisted smart system.
+This dashboard was built to show how a traditional physics/electronics prototype can evolve into a smart software-assisted EV monitoring system.
 
 It demonstrates the combination of:
 
 * Physics concepts
 * Battery behavior analysis
 * Embedded systems
-* Real-world EV problem solving
-* Software dashboard development
+* EV usability improvements
+* Dashboard software development
 
 ---
 
 ## Status
 
-Prototype dashboard completed for Physics Project Expo. Hardware auto-sync integration planned next.
+Prototype dashboard built rapidly for Physics Project Expo demonstration.
+
+Not production-ready.
+Contains simulated data.
+May contain bugs.
+Future improved version planned.
